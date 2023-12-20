@@ -1,6 +1,6 @@
-def run():
-
-    # Mapping column names to the input data.
+def run() -> dict:
+    # Mapping column names to the input data
+        # and expected type.
     #  * Column 1 - time
     #  * Column 2 - humidity
     #  * Column 3 - salinity
@@ -8,77 +8,29 @@ def run():
     #  * Column 5 - water_temperature
     #  * Column 6 - wind_speed
 
-    COLUMN_NAMES = [
-        "time",
-        "humidity",
-        "salinity",
-        "air_temperature",
-        "water_temperature",
-        "wind_speed"
-    ]
-
-    # Load data from a local CSV file into a list of lists
-    data = []
-    with open('data.csv') as csvdata:
-        csv_reader = csv.reader(csvdata)
-        for row in csv_reader:
-            data.append(row)
-
-    # Turn all of the data into numerical values
-    # so we can take the average of each column
-    numeric_data = []
-    for row in data:
-        new_row = []
-        # convert time column (the first column) to datetime.datetime
-        new_row.append(datetime.strptime(row[0], '%Y-%m-%dT%H:%M:%SZ'))
-        for value in row[1:]:
-            # convert all other columns to float
-            new_row.append(float(value))
-        numeric_data.append(new_row)
-
-    # Organize the data into columns
-    column_2 = []
-    column_3 = []
-    column_4 = []
-    column_5 = []
-    column_6 = []
-    for row in numeric_data:
-        # index from zero.
-        # do not include nan values in computing mean
-        if not math.isnan(row[1]):
-            column_2.append(row[1])
-        if not math.isnan(row[2]):
-            column_3.append(row[2])
-        if not math.isnan(row[3]):
-            column_4.append(row[3])
-        if not math.isnan(row[4]):
-            column_5.append(row[4])
-        if not math.isnan(row[5]):
-            column_6.append(row[5])
-
-    # Calculate the average of each column
-    col_2_avg = sum(column_2) / len(column_2)
-    col_3_avg = sum(column_3) / len(column_3)
-    col_4_avg = sum(column_4) / len(column_4)
-    col_5_avg = sum(column_5) / len(column_5)
-    col_6_avg = sum(column_6) / len(column_6)
-
-    # Return the averages of each column
-    return {
-        'humidity': col_2_avg,
-        'salinity': col_3_avg,
-        'air_temperature': col_4_avg,
-        'water_temperature': col_5_avg,
-        'wind_speed': col_6_avg
+    COLUMN_MAPPING = {
+        "time": "datetime64[ns]",
+        "humidity": float,
+        "salinity": float,
+        "air_temperature": float,
+        "water_temperature": float,
+        "wind_speed": float
     }
 
+    # Load data from a local CSV file into pd.DataFrame
+    data: pd.DataFrame = pd.read_csv('data.csv', header = None, names = COLUMN_MAPPING.keys())
+    # cast to desired types
+    data = data.astype(COLUMN_MAPPING)
+    # compute columnar means for numeric columns
+    data_means: dict = data.mean(skipna=True, numeric_only=True).to_dict()
+    # Return the averages of each column
+    return data_means
 
 if __name__ == '__main__':
     import sys
     import time
     import math
-    import csv
-    from datetime import datetime
+    import pandas as pd
 
     start = time.perf_counter()
     averages = run()
