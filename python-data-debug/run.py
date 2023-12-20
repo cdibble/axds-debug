@@ -30,8 +30,6 @@ if __name__ == '__main__':
     import sys
     import time
     import math
-    import csv
-    from datetime import datetime
     import pandas as pd
 
     start = time.perf_counter()
