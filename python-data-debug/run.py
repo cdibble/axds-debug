@@ -42,6 +42,24 @@ class CsvHandler:
         pd.DataFrame
         '''
         return data.astype(type_mapping)
+    
+    def get_column_means(self, columns: Optional[list] = None) -> dict:
+        '''
+        Computes columnar means of data attribute's numeric columns, skipping NA values.
+
+        Parameters
+        -----------
+        columns: list
+            Used to subset to certain columns. Defaults to all numeric columns
+
+        Returns
+        --------
+        dict
+            maps column names to mean value.
+        '''
+        if not columns:
+            columns = self.data.columns
+        return self.data[columns].mean(skipna = True, numeric_only = True).to_dict()
 
 class SensorData(CsvHandler):
     COLUMN_MAPPING = {
@@ -69,25 +87,7 @@ class SensorData(CsvHandler):
         super().__init__()
         # Load data from a local CSV file into pd.DataFrame
         self.data: pd.DataFrame = self._read_csv(csv_path = csv_path, column_names = self.COLUMN_MAPPING.keys())
-        self.data= self._cast_types(data = self.data, type_mapping = self.COLUMN_MAPPING)
-    
-    def get_column_means(self, columns: Optional[list] = None) -> dict:
-        '''
-        Computes columnar means of data attribute's numeric columns, skipping NA values.
-
-        Parameters
-        -----------
-        columns: list
-            Used to subset to certain columns. Defaults to all numeric columns
-
-        Returns
-        --------
-        dict
-            maps column names to mean value.
-        '''
-        if not columns:
-            columns = self.data.columns
-        return self.data[columns].mean(skipna = True, numeric_only = True).to_dict()
+        self.data= self._cast_types(data = self.data, type_mapping = self.COLUMN_MAPPING)    
 
 def run() -> dict:
     sensor_csv = SensorData(csv_path='data.csv')
